@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+// SORTING
+void Sort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;}}}}
+// Binary Search
+int binarySearch(int arr[],int beg, int end, int num) {
+    if (beg <= end) 
+    {
+        int mid = (beg + end)/2;
+        if (arr[mid]==num)
+            return mid;
+        if (arr[mid]<num)
+            return binarySearch(arr,mid+1,end,num);
+        return binarySearch(arr, beg,mid-1,num); }
+    return -1;
+}
+int main() {
+    srand(time(NULL));// Seed for random number generation based off current time which changes every second
+    int n, arr[1000], k;
+    char type[10];
+
+    printf("Enter size of array: ");//to get edge cases
+    scanf("%d", &n);
+
+    printf("Enter case type (best/worst/average): ");//for the problem
+    scanf("%s", type);
+
+    // random gen
+    for (int i = 0; i < n; i++)
+        arr[i] = (rand() % 100) - 50; // includes negative numbers
+
+    Sort(arr, n);
+
+    // Set k based on case type
+    if (type[0] == 'b') k = arr[n / 2];       // Best: middle
+    else if (type[0] == 'w') k = 9999;        // Worst: not found
+    else k = arr[rand() % n];                 // Average: random element[looked up this bit from google]
+
+    // time
+    clock_t t1 = clock();
+    int result = binarySearch(arr, 0, n-1, k);
+    clock_t t2 = clock();
+
+    double t = ((double)(t2 - t1) / CLOCKS_PER_SEC) * 1e12;//converting to ns
+
+    printf("Target: %d | Result Index: %d | Time: %.2f ns | Size : %d\n", k, result, t, n);
+
+    return 0;
+}
