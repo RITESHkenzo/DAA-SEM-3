@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <time.h>
+long long naive_count = 0, fast_count = 0;
+long long n_method(long long a, long long n) {
+long long result = 1;
+for (long long i = 1; i <= n; i++) {
+result = result * a;
+naive_count++;
+}
+return result;
+}
+long long f_method(long long a, long long n) {
+long long half;
+if (n == 0)
+return 1;
+if (n % 2 == 0) {
+half = f_method(a, n / 2);
+fast_count++;
+return half * half;
+} else {
+fast_count++;
+return a * f_method(a, n - 1);
+}
+}
+int main() {
+long long num, pow;
+clock_t start, end;
+double time_taken;
+printf("Enter the number: ");
+scanf("%lld", &num);
+printf("Enter the power: ");
+scanf("%lld", &pow);
+start = clock();
+long long naive_result = n_method(num, pow);
+end = clock();
+time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+printf("\nNaive Method Result: %lld\n", naive_result);
+printf("Time taken by Naive Method: %f seconds\n",
+time_taken);
+printf("Multiplications in Naive Method: %lld\n",
+naive_count);
+start = clock();
+long long fast_result = f_method(num, pow);
+end = clock();
+time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+printf("\nFast Method Result: %lld\n", fast_result);
+printf("Time taken by Fast Method: %f seconds\n",
+time_taken);
+printf("Multiplications in Fast Method: %lld\n",
+fast_count);
+return 0;
+}
