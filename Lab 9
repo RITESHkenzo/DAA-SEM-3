@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+struct HuffNode {
+char symbol;
+int frequency;
+struct HuffNode *left, *right;
+};
+struct MinHeap {
+int size;
+struct HuffNode **nodes;
+};
+struct HuffNode* makeNode(char symbol, int frequency) {
+struct HuffNode* temp = (struct HuffNode*)malloc(sizeof(struct HuffNode));
+temp->symbol = symbol;
+temp->frequency = frequency;
+temp->left = temp->right = NULL;
+return temp;
+}
+struct MinHeap* createHeap(int capacity) {
+struct MinHeap* heap = (struct MinHeap*)malloc(sizeof(struct MinHeap));
+heap->size = 0;
+heap->nodes = (struct HuffNode**)malloc(capacity * sizeof(struct HuffNode*));
+return heap;
+}
+void swap(struct HuffNode** a, struct HuffNode** b) {
+struct HuffNode* t = *a;
+*a = *b;
+*b = t;
+}
+void heapify(struct MinHeap* heap, int i) {
+int smallest = i;
+int l = 2 * i + 1;
+int r = 2 * i + 2;
+if (l < heap->size && heap->nodes[l]->frequency < heap->nodes[smallest]->frequency)
+smallest = l;
+if (r < heap->size && heap->nodes[r]->frequency < heap->nodes[smallest]->frequency)
+smallest = r;
+if (smallest != i) {
+swap(&heap->nodes[i], &heap->nodes[smallest]);
+heapify(heap, smallest);
+}
+}
+struct HuffNode* removeMin(struct MinHeap* heap) {
+struct HuffNode* temp = heap->nodes[0];
+heap->nodes[0] = heap->nodes[heap->size - 1];
+heap->size--;
+heapify(heap, 0);
+return temp;
+}
+void insertHeap(struct MinHeap* heap, struct HuffNode* node) {
+int i = heap->size++;
+while (i && node->frequency < heap->nodes[(i - 1) / 2]->frequency) {
+heap->nodes[i] = heap->nodes[(i - 1) / 2];
+i = (i - 1) / 2;
+}
+heap->nodes[i] = node;
+}
+void buildHeap(struct MinHeap* heap) {
+for (int i = (heap->size - 2) / 2; i >= 0; i--)
+heapify(heap, i);
+}
+int isLeaf(struct HuffNode* root) {
+return !(root->left) && !(root->right);
+}
+struct HuffNode* buildTree(char data[], int freq[], int n) {
+struct HuffNode *left, *right, *top;
+struct MinHeap* heap = createHeap(n);
+for (int i = 0; i < n; i++)
+heap->nodes[i] = makeNode(data[i], freq[i]);
+heap->size = n;
+buildHeap(heap);
+while (heap->size > 1) {
+left = removeMin(heap);
+right = removeMin(heap);
+top = makeNode('$', left->frequency + right->frequency);
+top->left = left;
+top->right = right;
+insertHeap(heap, top);
+}
+return removeMin(heap);
+}
+void printCodes(struct HuffNode* root, int arr[], int top, char codeTable[256][100]) {
+if (root->left) {
+arr[top] = 0;
+printCodes(root->left, arr, top + 1, codeTable);
+}
+if (root->right) {
+arr[top] = 1;
+printCodes(root->right, arr, top + 1, codeTable);
+}
+if (isLeaf(root)) {
+printf("%c : ", root->symbol);
+for (int i = 0; i < top; i++)
+printf("%d", arr[i]);
+printf("\n");
+for (int i = 0; i < top; i++)
+codeTable[(unsigned char)root->symbol][i] = arr[i] + '0';
+codeTable[(unsigned char)root->symbol][top] = '\0';
+}
+}
+void encodeText(char *input, char codeTable[256][100], char *encoded) {
+for (int i = 0; input[i]; i++)
+strcat(encoded, codeTable[(unsigned char)input[i]]);
+}
+void decodeText(struct HuffNode* root, char *encoded) {
+printf("\nDecoded Text: ");
+struct HuffNode* temp = root;
+for (int i = 0; encoded[i]; i++) {
+temp = (encoded[i] == '0') ? temp->left : temp->right;
+if (isLeaf(temp)) {
+printf("%c", temp->symbol);
+temp = root;
+}
+}
+printf("\n");
+}
+int main() {
+char text[100];
+printf("Enter text: ");
+gets(text);
+int freq[256] = {0};
+for (int i = 0; text[i]; i++)
+freq[(unsigned char)text[i]]++;
+char data[256];
+int frequencies[256];
+int count = 0;
+printf("\nCharacter Frequencies:\n");
+for (int i = 0; i < 256; i++) {
+if (freq[i]) {
+data[count] = i;
+frequencies[count] = freq[i];
+printf("%c : %d\n", i, freq[i]);
+count++;
+}
+}
+struct HuffNode* root = buildTree(data, frequencies, count);
+printf("\nHuffman Codes:\n");
+int arr[100];
+char codeTable[256][100] = {0};
+printCodes(root, arr, 0, codeTable);
+char encoded[1000] = "";
+encodeText(text, codeTable, encoded);
+printf("\nEncoded String: %s\n", encoded);
+decodeText(root, encoded);
+return 0;
+}
