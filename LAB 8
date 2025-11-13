@@ -1,0 +1,47 @@
+#include <stdio.h>
+struct Goods {
+int price;
+int weight;
+float ratio;
+};
+void sortByRatio(struct Goods g[], int n) {
+for (int x = 0; x < n - 1; x++) {
+for (int y = x + 1; y < n; y++) {
+if (g[x].ratio < g[y].ratio) {
+struct Goods t = g[x];
+g[x] = g[y];
+g[y] = t;
+}
+}
+}
+}
+int main() {
+int count;
+float bagCap, totalValue = 0.0;
+printf("Enter total number of goods: ");
+scanf("%d", &count);
+struct Goods g[count];
+for (int i = 0; i < count; i++) {
+printf("\nEnter price of good %d: "
+, i + 1);
+scanf("%d", &g[i].price);
+printf("Enter weight of good %d: "
+, i + 1);
+scanf("%d", &g[i].weight);
+g[i].ratio = (float)g[i].price / g[i].weight;
+}
+printf("\nEnter bag capacity: ");
+scanf("%f", &bagCap);
+sortByRatio(g, count);
+for (int i = 0; i < count; i++) {
+if (g[i].weight <= bagCap) {
+totalValue += g[i].price;
+bagCap -= g[i].weight;
+} else {
+totalValue += g[i].ratio * bagCap;
+break;
+}
+}
+printf("\nMaximum achievable value: %.2f\n", totalValue);
+return 0;
+}
