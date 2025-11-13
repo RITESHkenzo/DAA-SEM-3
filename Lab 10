@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <time.h>
+int max(int a, int b) {
+return (a > b) ? a : b;
+}
+void greedyKnapsack(int n, float weight[], float value[], float capacity) {
+float ratio[30], temp;
+float totalValue = 0, totalWeight = 0;
+int i, j;
+for (i = 0; i < n; i++) {
+ratio[i] = value[i] / weight[i];
+}
+for (i = 0; i < n - 1; i++) {
+for (j = i + 1; j < n; j++) {
+if (ratio[i] < ratio[j]) {
+temp = ratio[i]; ratio[i] = ratio[j]; ratio[j] = temp;
+temp = value[i]; value[i] = value[j]; value[j] = temp;
+temp = weight[i]; weight[i] = weight[j]; weight[j] = temp;
+}
+}
+}
+for (i = 0; i < n; i++) {
+if (totalWeight + weight[i] <= capacity) {
+totalWeight += weight[i];
+totalValue += value[i];
+} else {
+float remain = capacity - totalWeight;
+totalValue += value[i] * (remain / weight[i]);
+break;
+}
+}
+printf("Maximum Value (Greedy) = %.2f\n", totalValue);
+}
+int dpKnapsack(int n, int weight[], int value[], int capacity) {
+int dp[n + 1][capacity + 1];
+int i, w;
+for (i = 0; i <= n; i++) {
+for (w = 0; w <= capacity; w++) {
+if (i == 0 || w == 0)
+dp[i][w] = 0;
+else if (weight[i - 1] <= w)
+dp[i][w] = max(value[i - 1] + dp[i - 1][w - weight[i - 1]], dp[i - 1][w]);
+else
+dp[i][w] = dp[i - 1][w];
+}
+}
+return dp[n][capacity];
+}
+int main() {
+int n, i, capacity;
+float weight[30], value[30];
+int wInt[30], vInt[30];
+clock_t start, end;
+double timeTaken;
+printf("Enter total number of items: ");
+scanf("%d", &n);
+printf("Enter value and weight of each item:\n");
+for (i = 0; i < n; i++) {
+printf("Item %d (Value Weight): ", i + 1);
+scanf("%f %f", &value[i], &weight[i]);
+vInt[i] = (int)value[i];
+wInt[i] = (int)weight[i];
+}
+printf("Enter knapsack capacity: ");
+scanf("%d", &capacity);
+start = clock();
+greedyKnapsack(n, weight, value, capacity);
+end = clock();
+timeTaken = ((double)(end - start)) / CLOCKS_PER_SEC;
+printf("Time Taken (Greedy): %.6fseconds\n", timeTaken);
+start = clock();
+int maxVal = dpKnapsack(n, wInt, vInt, capacity);
+end = clock();
+timeTaken = ((double)(end - start)) / CLOCKS_PER_SEC;
+printf("Maximum Value (DP) = %d\n", maxVal);
+printf("Time Taken (DP): %.6fseconds\n", timeTaken);
+return 0;
+}
