@@ -1,0 +1,75 @@
+#include <stdio.h>
+// Function to merge two parts
+void merge(int nums[], int left, int mid, int right) {
+ int i, j, k;
+ int left_size = mid - left + 1;
+ int right_size = right - mid;
+ // Create temp arrays
+ int left_part[left_size], right_part[right_size];
+ // Copy data to temp arrays
+ for (i = 0; i < left_size; i++) {
+ left_part[i] = nums[left + i];
+ }
+ for (j = 0; j < right_size; j++) {
+ right_part[j] = nums[mid + 1 + j];
+ }
+ i = 0; // index for left_part
+ j = 0; // index for right_part
+ k = left; // index for nums
+ // Merge the two parts
+ while (i < left_size && j < right_size) {
+ if (left_part[i] <= right_part[j]) {
+ nums[k] = left_part[i];
+ i++;
+ } else {
+ nums[k] = right_part[j];
+ j++;
+ }
+ k++;
+ }
+ // Copy leftover items from left_part
+ while (i < left_size) {
+ nums[k] = left_part[i];
+ i++;
+ k++;
+ }
+ // Copy leftover items from right_part
+ while (j < right_size) {
+ nums[k] = right_part[j];
+ j++;
+ k++;
+ }
+}
+// Recursive merge sort
+void sort(int nums[], int left, int right) {
+ if (left < right) {
+ int mid = left + (right - left) / 2;
+ sort(nums, left, mid); // Sort left half
+ sort(nums, mid + 1, right); // Sort right half
+ merge(nums, left, mid, right); // Merge them
+ }
+}
+// Print the array
+void show(int nums[], int size) {
+ for (int i = 0; i < size; i++) {
+ printf("%d ", nums[i]);
+ }
+ printf("\n");
+}
+// Main function
+int main() {
+ int count;
+ printf("Enter number of items: ");
+ scanf("%d", &count);
+ int nums[count];
+ printf("Enter %d numbers:\n", count);
+ for (int i = 0; i < count; i++) {
+ scanf("%d", &nums[i]);
+ }
+ printf("Original list:\n");
+ show(nums, count);
+ sort(nums, 0, count - 1);
+ printf("\nSorted list:\n");
+ show(nums, count);
+ return 0;
+}
